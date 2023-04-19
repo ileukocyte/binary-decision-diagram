@@ -7,13 +7,11 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 public class Tests {
-    public static final int MIN_VARIABLES = 13;
-    public static final int MAX_VARIABLES = 24;
-    public static final int MIN_CLAUSES = 5;
+    public static final int MIN_CLAUSES = 15;
     public static final int MAX_CLAUSES = 55;
     public static final String CAPITAL_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-    public static boolean testBdd(BinaryDecisionDiagram bdd) {
+    public static boolean testBdd(BinaryDecisionDiagram bdd, boolean singleTestOutput) {
         var successful = true;
 
         var total = (int) Math.pow(2, bdd.getOrder().length());
@@ -47,17 +45,16 @@ public class Tests {
             }
         }
 
-        System.out.printf("Done! Valid values: %d/%d\n", total - wrongValues, total);
+        if (singleTestOutput) {
+            System.out.printf("Done! Valid values: %d/%d\n", total - wrongValues, total);
+        }
 
         return successful;
     }
 
-    public static String generateDnfExpression() {
+    public static String generateDnfExpression(int variableCount) {
         var random = new Random();
 
-        var variableCount = random.ints(1, MIN_VARIABLES, MAX_VARIABLES + 1)
-                .findFirst()
-                .getAsInt();
         var clausesCount = random.ints(1, MIN_CLAUSES, MAX_CLAUSES + 1)
                 .findFirst()
                 .getAsInt();
@@ -81,7 +78,7 @@ public class Tests {
 
             clauses.add(letters.stream()
                     .limit(variablesToTake)
-                    .map(v -> (Math.random() <= 0.15 ? "!" : "") + v)
+                    .map(v -> (Math.random() <= 0.15 && !clauses.contains(String.valueOf(v)) ? "!" : "") + v)
                     .collect(Collectors.joining("")));
         }
 
@@ -91,6 +88,10 @@ public class Tests {
     public static boolean parseFunction(String function, String values, String order) {
         if (function.isEmpty() || values.isEmpty() || order.isEmpty()) {
             throw new IllegalArgumentException("No argument must be empty!");
+        }
+
+        if (function.matches("[01]+")) {
+            return BinaryDecisionDiagram.Node.parseDigits(function).equals("1");
         }
 
         if (!function.matches("[!A-Z+\\s]+")) {

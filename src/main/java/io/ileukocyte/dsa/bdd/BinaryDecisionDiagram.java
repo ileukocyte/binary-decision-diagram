@@ -174,41 +174,41 @@ public class BinaryDecisionDiagram {
             }
             parse(child, order.substring(1));
         } else {*/
-            if (mapLevel.containsKey(left)) {
-                mapLevel.get(left).addParent(root);
+        if (mapLevel.containsKey(left)) {
+            mapLevel.get(left).addParent(root);
 
-                root.setLeft(mapLevel.get(left));
-            } else {
-                var leftNode = left.equals("0") ? falseLeaf : left.equals("1") ? trueLeaf : new Node(left);
+            root.setLeft(mapLevel.get(left));
+        } else {
+            var leftNode = left.equals("0") ? falseLeaf : left.equals("1") ? trueLeaf : new Node(left);
 
-                leftNode.addParent(root);
+            leftNode.addParent(root);
 
-                root.setLeft(leftNode);
+            root.setLeft(leftNode);
 
-                mapLevel.put(left, leftNode);
+            mapLevel.put(left, leftNode);
 
-                if (!left.equals("0") && !left.equals("1")) {
-                    parse(leftNode, order.substring(1));
-                }
+            if (!left.equals("0") && !left.equals("1")) {
+                parse(leftNode, order.substring(1));
             }
+        }
 
-            if (mapLevel.containsKey(right)) {
-                mapLevel.get(right).addParent(root);
+        if (mapLevel.containsKey(right)) {
+            mapLevel.get(right).addParent(root);
 
-                root.setRight(mapLevel.get(right));
-            } else {
-                var rightNode = right.equals("0") ? falseLeaf : right.equals("1") ? trueLeaf : new Node(right);
+            root.setRight(mapLevel.get(right));
+        } else {
+            var rightNode = right.equals("0") ? falseLeaf : right.equals("1") ? trueLeaf : new Node(right);
 
-                rightNode.addParent(root);
+            rightNode.addParent(root);
 
-                root.setRight(rightNode);
+            root.setRight(rightNode);
 
-                mapLevel.put(right, rightNode);
+            mapLevel.put(right, rightNode);
 
-                if (!right.equals("0") && !right.equals("1")) {
-                    parse(rightNode, order.substring(1));
-                }
+            if (!right.equals("0") && !right.equals("1")) {
+                parse(rightNode, order.substring(1));
             }
+        }
         //}
     }
 
@@ -284,15 +284,33 @@ public class BinaryDecisionDiagram {
         }
 
         protected static String parseDigits(String input) {
+            var functionVariables = input.chars()
+                    .mapToObj(i -> (char) i)
+                    .filter(c -> c >= 'A' && c <= 'Z')
+                    .distinct()
+                    .sorted()
+                    .map(String::valueOf)
+                    .toList();
+
             var filtered = Arrays.stream(input.split("\\+")).filter(c -> !c.contains("0")).toList();
 
             if (filtered.stream().anyMatch(c -> c.matches("1+"))) {
                 return "1";
             }
 
-            return filtered.isEmpty() ? "0" : filtered.stream().distinct()
+            var parsed = filtered.isEmpty() ? "0" : filtered.stream().distinct()
                     .collect(Collectors.joining("+"))
                     .replace("1", "");
+
+            filtered = Arrays.stream(parsed.split("\\+")).toList();
+
+            for (var variable : functionVariables) {
+                if (filtered.contains(variable) && filtered.contains(variable.toLowerCase())) {
+                    return "1";
+                }
+            }
+
+            return parsed;
         }
     }
 }
