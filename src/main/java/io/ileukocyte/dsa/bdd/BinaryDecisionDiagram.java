@@ -8,8 +8,8 @@ public class BinaryDecisionDiagram {
     private int computedSize = -1;
 
     private final Node root;
-    private final Node trueLeaf;
     private final Node falseLeaf;
+    private final Node trueLeaf;
 
     private final String order;
 
@@ -17,8 +17,8 @@ public class BinaryDecisionDiagram {
 
     private BinaryDecisionDiagram(String function, String order, Map<String, Map<String, Node>> map) {
         root = new Node(function);
-        trueLeaf = new Node("1");
         falseLeaf = new Node("0");
+        trueLeaf = new Node("1");
 
         this.order = order;
         this.map = map;
@@ -128,12 +128,11 @@ public class BinaryDecisionDiagram {
 
     private boolean use(String input, Node root) {
         if (root.getLeft() == null && root.getRight() == null) {
-            return switch (root.getData()) {
-                case "0" -> false;
-                case "1" -> true;
-                // should never occur
-                default -> throw new IllegalStateException("Unexpected value: " + root.getData());
-            };
+            if (!root.getData().equals(falseLeaf.getData()) && !root.getData().equals(trueLeaf.getData())) {
+                throw new IllegalStateException("Unexpected value: " + root.getData());
+            }
+
+            return root.getData().equals(trueLeaf.getData());
         } else {
             return use(input.substring(1), input.charAt(0) == '0' ? root.getLeft() : root.getRight());
         }
@@ -238,7 +237,7 @@ public class BinaryDecisionDiagram {
 
                 mapLevel.putIfAbsent(left, leftNode);
 
-                if (!left.equals("0") && !left.equals("1")/* && !containedKey*/) {
+                if (!left.equals("0") && !left.equals("1") && !containedKey) {
                     parse(leftNode, order.substring(1));
                 }
             }
