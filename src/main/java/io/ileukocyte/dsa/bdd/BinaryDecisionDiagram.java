@@ -154,73 +154,25 @@ public class BinaryDecisionDiagram {
         var mapLevel = map.get(String.valueOf(order.charAt(0)));
 
         /*if (left.equals(right)) {
-            var child = mapLevel.getOrDefault(left, left.equals("0") ? falseLeaf : left.equals("1") ? trueLeaf : new Node(left));
-            var newParent = root.getParents().iterator().next();
+            var child = new Node(left);
 
-            child.addParent(newParent);
+            if (root.getParents().isEmpty()) {
+                this.root = child;
 
-            if (root.equals(newParent.getLeft())) {
-                newParent.setLeft(child);
+                //parse(this.root, order.substring(1));
             } else {
-                newParent.setRight(child);
-            }
+                var grandparent = root.getParents().iterator().next();
 
-            //var containedKey = mapLevel.containsKey(left);
+                child.addParent(grandparent);
 
-            //mapLevel.putIfAbsent(left, child);
-
-            if (!left.equals("0") && !left.equals("1")*//* && !containedKey*//*) {
-                parse(child, order.substring(1));
-            }
-
-            *//*var child = mapLevel.getOrDefault(left, left.equals("0") ? falseLeaf : left.equals("1") ? trueLeaf : new Node(left));
-            var newParent = root.getParents().iterator().next();
-
-            child.addParent(newParent);
-
-            Node sibling;
-
-            if (root.equals(newParent.getLeft())) {
-                newParent.setLeft(child);
-
-                sibling = newParent.getRight();
-            } else {
-                newParent.setRight(child);
-
-                sibling = newParent.getLeft();
-            }
-
-            var containedKey = mapLevel.containsKey(left);
-
-            mapLevel.putIfAbsent(left, child);
-
-            if (!left.equals("0") && !left.equals("1") && !containedKey) {
-                parse(child, order.substring(1));
-            }
-
-            while (child.equals(sibling)) {
-                var temp = newParent;
-
-                try {
-                    newParent = newParent.getParents().iterator().next();
-                } catch (NoSuchElementException e) {
-                    break;
-                }
-
-                child.parents.remove(temp);
-
-                child.addParent(newParent);
-
-                if (temp.equals(newParent.getLeft())) {
-                    newParent.setLeft(child);
-
-                    sibling = newParent.getRight();
+                if (root.equals(grandparent.getLeft())) {
+                    grandparent.setLeft(child);
                 } else {
-                    newParent.setRight(child);
-
-                    sibling = newParent.getLeft();
+                    grandparent.setRight(child);
                 }
-            }*//*
+                //parse(child, order.substring(1));
+            }
+            parse(child, order.substring(1));
         } else {*/
             if (mapLevel.containsKey(left)) {
                 mapLevel.get(left).addParent(root);
@@ -233,11 +185,9 @@ public class BinaryDecisionDiagram {
 
                 root.setLeft(leftNode);
 
-                var containedKey = mapLevel.containsKey(left);
+                mapLevel.put(left, leftNode);
 
-                mapLevel.putIfAbsent(left, leftNode);
-
-                if (!left.equals("0") && !left.equals("1") && !containedKey) {
+                if (!left.equals("0") && !left.equals("1")) {
                     parse(leftNode, order.substring(1));
                 }
             }
@@ -253,11 +203,9 @@ public class BinaryDecisionDiagram {
 
                 root.setRight(rightNode);
 
-                var containedKey = mapLevel.containsKey(right);
+                mapLevel.put(right, rightNode);
 
-                mapLevel.putIfAbsent(right, rightNode);
-
-                if (!right.equals("0") && !right.equals("1") && !containedKey) {
+                if (!right.equals("0") && !right.equals("1")) {
                     parse(rightNode, order.substring(1));
                 }
             }

@@ -15,33 +15,19 @@ public class Main {
         //var formula = Files.readString(Path.of("C:\\Users\\alexi\\Desktop\\formula.txt")); // "GMRFDATIKLHEQNOJPSCB"
         //"A!B + BA + B!A + !A!B", "AB"
         //"ABC + !A + !B + !C", "ABC"
+        //"ABC + D!D + E!E", "DEABC"
 
-        var bdd = BinaryDecisionDiagram.createWithBestOrder("!AB!F + !C!D + E!F + AGH + I!JK + L!M!N + XYZ + T");
+        for (int i = 0; i < 100; i++) {
+            var bdd = BinaryDecisionDiagram.createWithBestOrder(Tests.generateDnfExpression());
 
-        System.out.println(bdd.computeSize());
+            System.out.printf("%d. ", i + 1);
 
-        for (int i = 0; i < Math.pow(2, 18); i++) {
-            //if (i % 50_000 == 0 && i > 0) System.out.println("50k done");
-
-            var values = String.format("%18s", Integer.toBinaryString(i)).replace(' ', '0');
-
-            var parseResult = Tests.parseFunction(bdd.getFunction(), values, bdd.getOrder());
-
-            try {
-                var bddResult = bdd.use(values);
-
-                if (bddResult != parseResult) {
-                    System.out.printf("%s. BDD: %b, actual: %b\n", values, bddResult, parseResult);
-                }
-            } catch (IllegalStateException e) {
-                System.out.printf("IllegalStateException for %s: (%s)\n", values, parseResult);
-
-                e.printStackTrace();
-
-                return;
-            }
+            Tests.testBdd(bdd);
         }
+        /*var bdd = BinaryDecisionDiagram.create("!AB!F + !C!D + E!F + AGH + I!JK + L!M!N + XYZ + T", "ABCDEFGHIJKLMNXYZT");
 
-        System.out.println("Done!");
+        Tests.testBdd(bdd);
+
+        System.out.println(bdd.computeSize());*/
     }
 }
