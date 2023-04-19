@@ -8,12 +8,14 @@ import java.util.stream.Collectors;
 
 public class Tests {
     public static final int MIN_VARIABLES = 13;
-    public static final int MAX_VARIABLES = 22;
+    public static final int MAX_VARIABLES = 24;
     public static final int MIN_CLAUSES = 5;
-    public static final int MAX_CLAUSES = 50;
+    public static final int MAX_CLAUSES = 55;
     public static final String CAPITAL_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-    public static void testBdd(BinaryDecisionDiagram bdd) {
+    public static boolean testBdd(BinaryDecisionDiagram bdd) {
+        var successful = true;
+
         var total = (int) Math.pow(2, bdd.getOrder().length());
         var wrongValues = 0;
 
@@ -33,17 +35,21 @@ public class Tests {
                     System.out.printf("%s. BDD: %b, actual: %b\n", values, bddResult, parseResult);
 
                     wrongValues++;
+
+                    successful = false;
                 }
             } catch (IllegalStateException e) {
                 System.out.printf("IllegalStateException for %s: (%s)\n", values, parseResult);
 
                 e.printStackTrace();
 
-                return;
+                return false;
             }
         }
 
         System.out.printf("Done! Valid values: %d/%d\n", total - wrongValues, total);
+
+        return successful;
     }
 
     public static String generateDnfExpression() {
@@ -75,7 +81,7 @@ public class Tests {
 
             clauses.add(letters.stream()
                     .limit(variablesToTake)
-                    .map(v -> (Math.random() <= 0.1 ? "!" : "") + v)
+                    .map(v -> (Math.random() <= 0.15 ? "!" : "") + v)
                     .collect(Collectors.joining("")));
         }
 
