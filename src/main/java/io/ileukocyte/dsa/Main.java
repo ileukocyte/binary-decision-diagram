@@ -4,7 +4,7 @@ import io.ileukocyte.dsa.bdd.BinaryDecisionDiagram;
 import io.ileukocyte.dsa.bdd.Tests;
 
 public class Main {
-    public static final boolean RUN_TESTS = true;
+    public static final boolean RUN_TESTS = false;
     public static final boolean SINGLE_TEST_OUTPUT = true;
 
     public static void main(String[] args) {
@@ -55,5 +55,8 @@ public class Main {
         //"A!B + BA + B!A + !A!B", "AB"
         //"ABC + !A + !B + !C", "ABC"
         //"ABC + D!D + E!E", "DEABC"
+        var bdd = BinaryDecisionDiagram.create("ABC+AB+!AC+!ABC", "ABC");
+        bdd.computeSize();
+        Tests.testBdd(bdd, true);
     }
 }

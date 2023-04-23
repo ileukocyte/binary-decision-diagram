@@ -302,7 +302,7 @@ public class BinaryDecisionDiagram {
                     .collect(Collectors.joining("+"))
                     .replace("1", "");
 
-            filtered = Arrays.stream(parsed.split("\\+")).toList();
+            filtered = Arrays.stream(parsed.split("\\+")).distinct().toList();
 
             for (var variable : functionVariables) {
                 if (filtered.contains(variable) && filtered.contains(variable.toLowerCase())) {
@@ -310,7 +310,7 @@ public class BinaryDecisionDiagram {
                 }
             }
 
-            return parsed;
+            return String.join("+", filtered);
         }
     }
 }
