@@ -7,19 +7,21 @@ import java.util.stream.Collectors;
 public class BinaryDecisionDiagram {
     private int computedSize = -1;
 
-    private final Node root;
+    private Node root;
     private final Node falseLeaf;
     private final Node trueLeaf;
 
+    private final String function;
     private final String order;
 
     private final Map<String, Map<String, Node>> map;
 
     private BinaryDecisionDiagram(String function, String order, Map<String, Map<String, Node>> map) {
-        root = new Node(function);
+        root = new Node(Node.format(function));
         falseLeaf = new Node("0");
         trueLeaf = new Node("1");
 
+        this.function = function;
         this.order = order;
         this.map = map;
     }
@@ -33,7 +35,7 @@ public class BinaryDecisionDiagram {
     }
 
     public String getFunction() {
-        return root.getDataDnf();
+        return function;
     }
 
     public int computeSize() {
@@ -80,7 +82,7 @@ public class BinaryDecisionDiagram {
             map.put(String.valueOf(variable), new HashMap<>());
         }
 
-        var bdd = new BinaryDecisionDiagram(Node.format(function), order, map);
+        var bdd = new BinaryDecisionDiagram(function, order, map);
 
         bdd.parse(bdd.getRoot(), bdd.getOrder());
 
@@ -134,6 +136,12 @@ public class BinaryDecisionDiagram {
 
             return root.getData().equals(trueLeaf.getData());
         } else {
+            var data = root.getDataDnf();
+
+            if (!data.contains(String.valueOf(order.charAt(order.length() - input.length())))) {
+                return use(input.substring(1), root);
+            }
+
             return use(input.substring(1), input.charAt(0) == '0' ? root.getLeft() : root.getRight());
         }
     }
@@ -153,63 +161,63 @@ public class BinaryDecisionDiagram {
 
         var mapLevel = map.get(String.valueOf(order.charAt(0)));
 
-        /*if (left.equals(right)) {
-            var child = new Node(left);
+        var containsLeft = mapLevel.containsKey(left);
+        var leftNode = mapLevel.getOrDefault(left, left.equals("0") ? falseLeaf : left.equals("1") ? trueLeaf : new Node(left));
 
-            if (root.getParents().isEmpty()) {
-                this.root = child;
+        leftNode.addParent(root);
+        root.setLeft(leftNode);
 
-                //parse(this.root, order.substring(1));
-            } else {
-                var grandparent = root.getParents().iterator().next();
+        mapLevel.put(left, leftNode);
 
-                child.addParent(grandparent);
+        var containsRight = mapLevel.containsKey(right);
+        var rightNode = mapLevel.getOrDefault(right, right.equals("0") ? falseLeaf : right.equals("1") ? trueLeaf : new Node(right));
 
-                if (root.equals(grandparent.getLeft())) {
-                    grandparent.setLeft(child);
-                } else {
-                    grandparent.setRight(child);
-                }
-                //parse(child, order.substring(1));
-            }
-            parse(child, order.substring(1));
-        } else {*/
-        if (mapLevel.containsKey(left)) {
-            mapLevel.get(left).addParent(root);
+        rightNode.addParent(root);
+        root.setRight(rightNode);
 
-            root.setLeft(mapLevel.get(left));
-        } else {
-            var leftNode = left.equals("0") ? falseLeaf : left.equals("1") ? trueLeaf : new Node(left);
+        mapLevel.put(right, rightNode);
 
-            leftNode.addParent(root);
-
-            root.setLeft(leftNode);
-
-            mapLevel.put(left, leftNode);
-
-            if (!left.equals("0") && !left.equals("1")) {
+        if (!left.equals("0") && !left.equals("1")) {
+            if (!containsLeft) {
                 parse(leftNode, order.substring(1));
+            } else {
+                sReduction(leftNode);
             }
         }
 
-        if (mapLevel.containsKey(right)) {
-            mapLevel.get(right).addParent(root);
-
-            root.setRight(mapLevel.get(right));
-        } else {
-            var rightNode = right.equals("0") ? falseLeaf : right.equals("1") ? trueLeaf : new Node(right);
-
-            rightNode.addParent(root);
-
-            root.setRight(rightNode);
-
-            mapLevel.put(right, rightNode);
-
-            if (!right.equals("0") && !right.equals("1")) {
+        if (!right.equals("0") && !right.equals("1")) {
+            if (!containsRight) {
                 parse(rightNode, order.substring(1));
+            } else {
+                sReduction(rightNode);
             }
         }
-        //}
+
+        sReduction(root);
+    }
+
+    private void sReduction(Node root) {
+        if (root.getLeft() != null && root.getRight() != null && root.getLeft().getData().equals(root.getRight().getData())) {
+            var child = root.getLeft();
+
+            child.removeParent(root);
+
+            if (!root.equals(this.root)) {
+                for (var grandparent : root.getParents()) {
+                    child.addParent(grandparent);
+
+                    if (root.equals(grandparent.getLeft())) {
+                        grandparent.setLeft(child);
+                    }
+
+                    if (root.equals(grandparent.getRight())) {
+                        grandparent.setRight(child);
+                    }
+                }
+            } else {
+                this.root = child;
+            }
+        }
     }
 
     private void fillNodeSet(Set<Node> nodes, Node root) {
@@ -268,6 +276,10 @@ public class BinaryDecisionDiagram {
 
         private void addParent(Node parent) {
             parents.add(parent);
+        }
+
+        private void removeParent(Node parent) {
+            parents.remove(parent);
         }
 
         public String getDataDnf() {
