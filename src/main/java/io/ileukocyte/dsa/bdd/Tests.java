@@ -57,7 +57,7 @@ public class Tests {
 
         var clausesCount = random.ints(1, MIN_CLAUSES, MAX_CLAUSES + 1)
                 .findFirst()
-                .getAsInt();
+                .orElseThrow();
 
         var clauses = new ArrayList<String>();
 
@@ -70,7 +70,7 @@ public class Tests {
         for (int i = 0; i < clausesCount; i++) {
             var variablesToTake = random.ints(1, 1, variableCount + 1)
                     .findFirst()
-                    .getAsInt();
+                    .orElseThrow();
 
             var temp = new ArrayList<>(variables);
 
@@ -83,7 +83,15 @@ public class Tests {
                     .collect(Collectors.joining("")));
         }
 
-        return String.join(" + ", clauses.stream().distinct().toList());
+        var result = String.join(" + ", clauses.stream().distinct().toList());
+        var resultVariableCount = result.chars()
+                .mapToObj(i -> (char) i)
+                .distinct()
+                .filter(c -> c >= 'A' && c <= 'Z')
+                .count();
+
+        // in case the result contains less variables than expected
+        return resultVariableCount < variableCount ? generateDnfExpression(variableCount) : result;
     }
 
     // used for getting a boolean value directly from a function input

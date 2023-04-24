@@ -93,6 +93,18 @@ public class BinaryDecisionDiagram {
         return bdd;
     }
 
+    public static BinaryDecisionDiagram create(String function) {
+        var sortedOrder = function.chars()
+                .mapToObj(n -> (char) n)
+                .filter(c -> c >= 'A' && c <= 'Z')
+                .distinct()
+                .sorted()
+                .map(String::valueOf)
+                .collect(Collectors.joining(""));
+
+        return create(function, sortedOrder);
+    }
+
     public static BinaryDecisionDiagram createWithBestOrder(String function) {
         if (function.isEmpty()) {
             throw new IllegalArgumentException("The provided function must not be empty!");

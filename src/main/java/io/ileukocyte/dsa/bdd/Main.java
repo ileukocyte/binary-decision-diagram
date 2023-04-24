@@ -6,6 +6,7 @@ public class Main {
     public static final int INDIVIDUAL_TESTS = 100;
     public static final int MIN_VARIABLES = 13;
     public static final int MAX_VARIABLES = 21;
+    public static final boolean USE_BEST_ORDER = true;
     public static final boolean SINGLE_TEST_OUTPUT = true;
 
     public static final boolean RUN_SPECIAL_TESTS = false;
@@ -31,7 +32,7 @@ public class Main {
                     var memory = runtime.totalMemory() - runtime.freeMemory();
                     var now = System.nanoTime();
 
-                    var bdd = BinaryDecisionDiagram.createWithBestOrder(dnf);
+                    var bdd = USE_BEST_ORDER ? BinaryDecisionDiagram.createWithBestOrder(dnf) : BinaryDecisionDiagram.create(dnf);
 
                     memory = runtime.totalMemory() - runtime.freeMemory() - memory;
                     memoryUsed += memory >> 10;
