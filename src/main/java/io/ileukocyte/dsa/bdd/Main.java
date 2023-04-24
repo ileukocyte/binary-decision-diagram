@@ -2,20 +2,22 @@ package io.ileukocyte.dsa.bdd;
 
 public class Main {
     // Testing flags
-    public static final boolean RUN_TESTS = true;
+    public static final boolean RUN_RANDOM_TESTS = true;
     public static final int INDIVIDUAL_TESTS = 100;
+    public static final int MIN_VARIABLES = 13;
+    public static final int MAX_VARIABLES = 21;
     public static final boolean SINGLE_TEST_OUTPUT = true;
 
     public static final boolean RUN_SPECIAL_TESTS = false;
 
     public static void main(String[] args) {
-        if (RUN_TESTS) {
+        if (RUN_RANDOM_TESTS) {
             var successful = INDIVIDUAL_TESTS;
 
             var testCounter = 0;
             var totalReduction = 0.0;
 
-            for (int i = 13; i <= 21; i++) {
+            for (int i = MIN_VARIABLES; i <= MAX_VARIABLES; i++) {
                 var reduction = 0.0;
                 var creationTime = 0;
 
