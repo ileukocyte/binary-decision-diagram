@@ -76,6 +76,7 @@ public class Tests {
 
             Collections.shuffle(temp);
 
+            // 15% is the probability of whether a variable within a clause will be negated
             clauses.add(letters.stream()
                     .limit(variablesToTake)
                     .map(v -> (Math.random() <= 0.15 && !clauses.contains(String.valueOf(v)) ? "!" : "") + v)
@@ -85,6 +86,7 @@ public class Tests {
         return String.join(" + ", clauses.stream().distinct().toList());
     }
 
+    // used for getting a boolean value directly from a function input
     public static boolean parseFunction(String function, String values, String order) {
         if (function.isEmpty() || values.isEmpty() || order.isEmpty()) {
             throw new IllegalArgumentException("No argument must be empty!");
@@ -95,7 +97,7 @@ public class Tests {
         }
 
         if (!function.matches("[!A-Z+\\s]+")) {
-            throw new IllegalArgumentException("The provided format is not correct!");
+            throw new IllegalArgumentException("The provided format is not correct! DNF (e.g., ABC + A!B!C) should be used instead!");
         }
 
         var functionVariables = function.chars()

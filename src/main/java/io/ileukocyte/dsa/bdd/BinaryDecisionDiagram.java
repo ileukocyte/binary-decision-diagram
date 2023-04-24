@@ -5,6 +5,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class BinaryDecisionDiagram {
+    // calculated dynamically once right after the BDD is created
     private int computedSize = -1;
 
     private Node root;
@@ -14,6 +15,7 @@ public class BinaryDecisionDiagram {
     private final String function;
     private final String order;
 
+    // used for I-reduction
     private final Map<String, Map<String, Node>> map;
 
     private BinaryDecisionDiagram(String function, String order, Map<String, Map<String, Node>> map) {
@@ -73,12 +75,13 @@ public class BinaryDecisionDiagram {
         }
 
         if (!function.matches("[!A-Z+\\s]+")) {
-            throw new IllegalArgumentException("The provided format is not correct!");
+            throw new IllegalArgumentException("The provided format is not correct! DNF (e.g., ABC + A!B!C) should be used instead!");
         }
 
         var map = new HashMap<String, Map<String, Node>>();
 
         for (var variable : functionVariables.toCharArray()) {
+            // creating an individual map for each variable
             map.put(String.valueOf(variable), new HashMap<>());
         }
 
@@ -106,6 +109,7 @@ public class BinaryDecisionDiagram {
 
         var orders = new HashSet<String>();
 
+        // linear method (e.g., ABC, BCA, CAB)
         do {
             orders.add(temp);
 
@@ -113,6 +117,7 @@ public class BinaryDecisionDiagram {
             temp = temp.substring(1);
         } while (!temp.equals(variables));
 
+        // checking which order generates the least nodes
         var bdds = orders.stream()
                 .map(o -> create(function, o))
                 .sorted(Comparator.comparing(BinaryDecisionDiagram::computeSize))
@@ -131,14 +136,17 @@ public class BinaryDecisionDiagram {
 
     private boolean use(String input, Node root) {
         if (root.getLeft() == null && root.getRight() == null) {
-            if (!root.getData().equals(falseLeaf.getData()) && !root.getData().equals(trueLeaf.getData())) {
-                throw new IllegalStateException("Unexpected value: " + root.getData());
+            // just in case a leaf node contains something else than "0" or "1"
+            // should never occur
+            if (!root.getFunction().equals(falseLeaf.getFunction()) && !root.getFunction().equals(trueLeaf.getFunction())) {
+                throw new IllegalStateException("Unexpected value: " + root.getFunction());
             }
 
-            return root.getData().equals(trueLeaf.getData());
+            return root.getFunction().equals(trueLeaf.getFunction());
         } else {
-            var data = root.getDataDnf();
+            var data = root.getFunctionDnf();
 
+            // checking whether the current variable has been reduced
             if (!data.contains(String.valueOf(order.charAt(order.length() - input.length())))) {
                 return use(input.substring(1), root);
             }
@@ -152,7 +160,7 @@ public class BinaryDecisionDiagram {
             return;
         }
 
-        var function = root.getData();
+        var function = root.getFunction();
 
         var left = function.replace(order.charAt(0), '0').replace(Character.toLowerCase(order.charAt(0)), '1');
         var right = function.replace(order.charAt(0), '1').replace(Character.toLowerCase(order.charAt(0)), '0');
@@ -160,6 +168,7 @@ public class BinaryDecisionDiagram {
         left = Node.parseDigits(left);
         right = Node.parseDigits(right);
 
+        // I-reduction map
         var mapLevel = map.get(String.valueOf(order.charAt(0)));
 
         var containsLeft = mapLevel.containsKey(left);
@@ -198,7 +207,7 @@ public class BinaryDecisionDiagram {
     }
 
     private void sReduction(Node root) {
-        if (root.getLeft() != null && root.getRight() != null && root.getLeft().getData().equals(root.getRight().getData())) {
+        if (root.getLeft() != null && root.getRight() != null && root.getLeft().getFunction().equals(root.getRight().getFunction())) {
             var child = root.getLeft();
 
             child.removeParent(root);
@@ -221,6 +230,7 @@ public class BinaryDecisionDiagram {
         }
     }
 
+    // used for getting all the unique nodes of the BDD
     private void fillNodeSet(Set<Node> nodes, Node root) {
         if (root == null) {
             return;
@@ -232,27 +242,33 @@ public class BinaryDecisionDiagram {
         fillNodeSet(nodes, root.getRight());
     }
 
+    public static int fullNodeCount(int variables) {
+        return (int) (Math.pow(2, variables + 1) - 1);
+    }
+
     public static class Node {
-        private final String data;
-        private final String dataDnf;
+        private final String function;
+
+        // non-formatted function
+        private final String functionDnf;
 
         private Node left = null;
         private Node right = null;
         private final Set<Node> parents;
 
-        public Node(String data) {
-            this.data = data;
+        public Node(String function) {
+            this.function = function;
 
             parents = new HashSet<>();
 
             var pattern = Pattern.compile("([a-z])");
-            var matcher = pattern.matcher(data);
+            var matcher = pattern.matcher(function);
 
-            dataDnf = matcher.replaceAll(match -> "!" + match.group().toUpperCase()).replace("+", " + ");
+            functionDnf = matcher.replaceAll(match -> "!" + match.group().toUpperCase()).replace("+", " + ");
         }
 
-        public String getData() {
-            return data;
+        public String getFunction() {
+            return function;
         }
 
         public Node getLeft() {
@@ -283,8 +299,8 @@ public class BinaryDecisionDiagram {
             parents.remove(parent);
         }
 
-        public String getDataDnf() {
-            return dataDnf;
+        public String getFunctionDnf() {
+            return functionDnf;
         }
 
         protected static String format(String function) {

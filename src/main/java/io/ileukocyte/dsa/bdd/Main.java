@@ -36,8 +36,8 @@ public class Main {
                     }
 
                     testCounter++;
-                    reduction += 1.0 - bdd.computeSize() / (Math.pow(2, i + 1) - 1);
-                    totalReduction += 1.0 - bdd.computeSize() / (Math.pow(2, i + 1) - 1);
+                    reduction += 1.0 - (double) bdd.computeSize() / BinaryDecisionDiagram.fullNodeCount(i);
+                    totalReduction += 1.0 - (double) bdd.computeSize() / BinaryDecisionDiagram.fullNodeCount(i);
                 }
 
                 System.out.printf("Testing (%d variables) has finished, the number of successful tests: %d/%d\n", i, successful, INDIVIDUAL_TESTS);
@@ -54,7 +54,7 @@ public class Main {
                     {"!AB!F + !C!D + E!F + AGH + I!JK + L!M!N + XYZ + T", "ABCDEFGHIJKLMNXYZT"},
                     {"ABCD + AB + BC + CD", "ABCD"},
                     {"AB + AC + BC", "ABC"},
-                    {"A!B + BA + B!A + !A!B", "AB"},
+                    {"AB + !AB + A!B + !A!B", "AB"},
                     {"ABC + !A + !B + !C", "ABC"},
                     {"ABC + D!D + E!E", "DEABC"},
                     {"ABC + AB + !AC + !ABC", "ABC"}
