@@ -85,6 +85,7 @@ public class BinaryDecisionDiagram {
         var bdd = new BinaryDecisionDiagram(function, order, map);
 
         bdd.parse(bdd.getRoot(), bdd.getOrder());
+        bdd.computeSize();
 
         return bdd;
     }
