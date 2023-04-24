@@ -20,12 +20,21 @@ public class Main {
             for (int i = MIN_VARIABLES; i <= MAX_VARIABLES; i++) {
                 var reduction = 0.0;
                 var creationTime = 0;
+                var memoryUsed = 0;
 
                 for (int j = 0; j < INDIVIDUAL_TESTS; j++) {
+                    var dnf = Tests.generateDnfExpression(i);
+
+                    System.gc();
+
+                    var runtime = Runtime.getRuntime();
+                    var memory = runtime.totalMemory() - runtime.freeMemory();
                     var now = System.nanoTime();
 
-                    var dnf = Tests.generateDnfExpression(i);
                     var bdd = BinaryDecisionDiagram.createWithBestOrder(dnf);
+
+                    memory = runtime.totalMemory() - runtime.freeMemory() - memory;
+                    memoryUsed += memory >> 10;
 
                     creationTime += System.nanoTime() - now;
 
@@ -45,6 +54,7 @@ public class Main {
                 System.out.printf("Testing (%d variables) has finished, the number of successful tests: %d/%d\n", i, successful, INDIVIDUAL_TESTS);
                 System.out.printf("Average reduction: %f%%\n", (reduction / INDIVIDUAL_TESTS) * 100);
                 System.out.printf("Average creation time: %d ns\n", creationTime / INDIVIDUAL_TESTS);
+                System.out.printf("Average memory usage: %d kB\n", memoryUsed / INDIVIDUAL_TESTS);
                 System.out.println("--------------------------------------------------");
             }
 
