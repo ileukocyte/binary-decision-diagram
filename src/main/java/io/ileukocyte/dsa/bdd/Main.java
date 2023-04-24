@@ -48,8 +48,8 @@ public class Main {
                     }
 
                     testCounter++;
-                    reduction += 1.0 - (double) bdd.computeSize() / BinaryDecisionDiagram.fullNodeCount(i);
-                    totalReduction += 1.0 - (double) bdd.computeSize() / BinaryDecisionDiagram.fullNodeCount(i);
+                    reduction += 1.0 - (double) bdd.size() / BinaryDecisionDiagram.fullNodeCount(i);
+                    totalReduction += 1.0 - (double) bdd.size() / BinaryDecisionDiagram.fullNodeCount(i);
                 }
 
                 System.out.printf("Testing (%d variables) has finished, the number of successful tests: %d/%d\n", i, successful, INDIVIDUAL_TESTS);
@@ -76,7 +76,7 @@ public class Main {
             for (var function : functions) {
                 var bdd = BinaryDecisionDiagram.create(function[0], function[1]);
 
-                System.out.printf("%s: %d nodes\n", function[0], bdd.computeSize());
+                System.out.printf("%s: %d nodes\n", function[0], bdd.size());
 
                 Tests.testBdd(bdd, SINGLE_TEST_OUTPUT);
             }

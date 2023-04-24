@@ -40,7 +40,7 @@ public class BinaryDecisionDiagram {
         return function;
     }
 
-    public int computeSize() {
+    public int size() {
         if (computedSize == -1) {
             var nodes = new HashSet<Node>();
 
@@ -88,7 +88,7 @@ public class BinaryDecisionDiagram {
         var bdd = new BinaryDecisionDiagram(function, order, map);
 
         bdd.parse(bdd.getRoot(), bdd.getOrder());
-        bdd.computeSize();
+        bdd.size();
 
         return bdd;
     }
@@ -132,7 +132,7 @@ public class BinaryDecisionDiagram {
         // checking which order generates the least nodes
         var bdds = orders.stream()
                 .map(o -> create(function, o))
-                .sorted(Comparator.comparing(BinaryDecisionDiagram::computeSize))
+                .sorted(Comparator.comparing(BinaryDecisionDiagram::size))
                 .toList();
 
         return bdds.get(0);
