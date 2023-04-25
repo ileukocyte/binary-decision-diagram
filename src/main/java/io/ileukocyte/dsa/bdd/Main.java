@@ -8,7 +8,7 @@ public class Main {
     public static final boolean RUN_RANDOM_TESTS = true;
     public static final int INDIVIDUAL_TESTS = 100;
     public static final int MIN_VARIABLES = 13;
-    public static final int MAX_VARIABLES = 21;
+    public static final int MAX_VARIABLES = 20;
     public static final boolean USE_BEST_ORDER = true;
     public static final boolean SINGLE_TEST_OUTPUT = true;
 
