@@ -61,18 +61,8 @@ public class BinaryDecisionDiagram {
             throw new IllegalArgumentException("Neither the function nor the order can be empty!");
         }
 
-        var functionVariables = function.chars()
-                .mapToObj(i -> (char) i)
-                .filter(c -> c >= 'A' && c <= 'Z')
-                .distinct()
-                .sorted()
-                .map(String::valueOf)
-                .collect(Collectors.joining(""));
-        var orderVariables = order.chars()
-                .mapToObj(i -> (char) i)
-                .sorted()
-                .map(String::valueOf)
-                .collect(Collectors.joining(""));
+        var functionVariables = String.join("", Node.getDnfVariablesOrdered(function, true, true));
+        var orderVariables = String.join("", Node.getDnfVariablesOrdered(order, false, false));
 
         if (!functionVariables.equals(orderVariables)) {
             throw new IllegalArgumentException("The function and order provided do not correspond to each other!");
@@ -82,7 +72,7 @@ public class BinaryDecisionDiagram {
             throw new IllegalArgumentException("The provided format is not correct! DNF (e.g., ABC + A!B!C) should be used instead!");
         }
 
-        var map = new HashMap<String, Map<String, Node>>();
+        var map = new TreeMap<String, Map<String, Node>>();
 
         for (var variable : functionVariables.toCharArray()) {
             // creating an individual map for each variable
@@ -98,13 +88,7 @@ public class BinaryDecisionDiagram {
     }
 
     public static BinaryDecisionDiagram create(String function) {
-        var sortedOrder = function.chars()
-                .mapToObj(n -> (char) n)
-                .filter(c -> c >= 'A' && c <= 'Z')
-                .distinct()
-                .sorted()
-                .map(String::valueOf)
-                .collect(Collectors.joining(""));
+        var sortedOrder = String.join("", Node.getDnfVariablesOrdered(function, true, true));
 
         return create(function, sortedOrder);
     }
@@ -114,13 +98,7 @@ public class BinaryDecisionDiagram {
             throw new IllegalArgumentException("The provided function must not be empty!");
         }
 
-        var variables = function.chars()
-                .mapToObj(i -> (char) i)
-                .filter(c -> c >= 'A' && c <= 'Z')
-                .distinct()
-                .sorted()
-                .map(String::valueOf)
-                .collect(Collectors.joining(""));
+        var variables = String.join("", Node.getDnfVariablesOrdered(function, true, true));
         var temp = variables;
 
         var orders = new HashSet<String>();
@@ -262,7 +240,7 @@ public class BinaryDecisionDiagram {
         return (int) (Math.pow(2, variables + 1) - 1);
     }
 
-    public static class Node {
+    protected static class Node {
         private final String function;
 
         // non-formatted function
@@ -319,7 +297,7 @@ public class BinaryDecisionDiagram {
             return functionDnf;
         }
 
-        protected static String format(String function) {
+        public static String format(String function) {
             function = function.replaceAll("\\s+", "");
 
             var pattern = Pattern.compile("!([A-Z])");
@@ -328,14 +306,8 @@ public class BinaryDecisionDiagram {
             return matcher.replaceAll(match -> match.group().toLowerCase().substring(1));
         }
 
-        protected static String parseDigits(String input) {
-            var functionVariables = input.chars()
-                    .mapToObj(i -> (char) i)
-                    .filter(c -> c >= 'A' && c <= 'Z')
-                    .distinct()
-                    .sorted()
-                    .map(String::valueOf)
-                    .toList();
+        public static String parseDigits(String input) {
+            var functionVariables = getDnfVariablesOrdered(input, true, true);
 
             var filtered = Arrays.stream(input.split("\\+")).filter(c -> !c.contains("0")).toList();
 
@@ -356,6 +328,20 @@ public class BinaryDecisionDiagram {
             }
 
             return String.join("+", filtered);
+        }
+
+        public static List<String> getDnfVariablesOrdered(String input, boolean distinct, boolean filterLetters) {
+            var stream = input.chars().mapToObj(i -> (char) i);
+
+            if (filterLetters) {
+                stream = stream.filter(c -> c >= 'A' && c <= 'Z');
+            }
+
+            if (distinct) {
+                stream = stream.distinct();
+            }
+
+            return stream.sorted().map(String::valueOf).toList();
         }
     }
 }

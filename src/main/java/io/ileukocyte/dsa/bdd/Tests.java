@@ -108,18 +108,8 @@ public class Tests {
             throw new IllegalArgumentException("The provided format is not correct! DNF (e.g., ABC + A!B!C) should be used instead!");
         }
 
-        var functionVariables = function.chars()
-                .mapToObj(i -> (char) i)
-                .filter(c -> c >= 'A' && c <= 'Z')
-                .distinct()
-                .sorted()
-                .map(String::valueOf)
-                .collect(Collectors.joining(""));
-        var orderVariables = order.chars()
-                .mapToObj(i -> (char) i)
-                .sorted()
-                .map(String::valueOf)
-                .collect(Collectors.joining(""));
+        var functionVariables = String.join("", BinaryDecisionDiagram.Node.getDnfVariablesOrdered(function, true, true));
+        var orderVariables = String.join("", BinaryDecisionDiagram.Node.getDnfVariablesOrdered(order, false, false));
 
         if (!functionVariables.equals(orderVariables)) {
             throw new IllegalArgumentException("The function and order provided do not correspond to each other!");

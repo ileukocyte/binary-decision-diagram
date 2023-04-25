@@ -1,5 +1,6 @@
 package io.ileukocyte.dsa.bdd;
 
+import java.util.LinkedHashMap;
 import java.util.TreeMap;
 
 public class Main {
@@ -87,21 +88,21 @@ public class Main {
         }
 
         if (RUN_SPECIAL_TESTS) {
-            var functions = new String[][] {
-                    {"!AB!F + !C!D + E!F + AGH + I!JK + L!M!N + XYZ + T", "ABCDEFGHIJKLMNXYZT"}, // an example from the Internet, should be reduced to 26 nodes
-                    {"ABCD + AB + BC + CD", "ABCD"}, // a general reduction test (31 nodes -> 8 nodes)
-                    {"AB + AC + BC", "ABC"}, // an example from the lecture (reduction combination)
-                    {"ABC + D!D + E!E", "DEABC"}, // an S-reduction test (63 nodes -> 5 nodes)
-                    {"ABC + AB + !AC + !ABC", "ABC"}, // an S-reduction test
-                    {"AB + !AB + A!B + !A!B", "AB"}, // a tautology (1 node)
-                    {"ABC + !A + !B + !C", "ABC"}, // a tautology (1 node)
-                    {"A!A + B!B + C!C + D!D + E!E + F + G", "FGABCDE"} // a tautology (1 node)
-            };
+            var functions = new LinkedHashMap<String, String>();
 
-            for (var function : functions) {
-                var bdd = BinaryDecisionDiagram.create(function[0], function[1]);
+            functions.put("!AB!F + !C!D + E!F + AGH + I!JK + L!M!N + XYZ + T", "ABCDEFGHIJKLMNXYZT"); // an example from the Internet, should be reduced to 26 nodes
+            functions.put("ABCD + AB + BC + CD", "ABCD"); // a general reduction test (31 nodes -> 8 nodes)
+            functions.put("AB + AC + BC", "ABC"); // an example from the lecture (reduction combination)
+            functions.put("ABC + D!D + E!E", "DEABC"); // an S-reduction test (63 nodes -> 5 nodes)
+            functions.put("ABC + AB + !AC + !ABC", "ABC"); // an S-reduction test
+            functions.put("AB + !AB + A!B + !A!B", "AB"); // a tautology (1 node)
+            functions.put("ABC + !A + !B + !C", "ABC"); // a tautology (1 node)
+            functions.put("A!A + B!B + C!C + D!D + E!E + F + G", "FGABCDE"); // a tautology (1 node)
 
-                System.out.printf("%s: %d nodes, tautology: %b\n", function[0], bdd.size(), bdd.isTautology());
+            for (var function : functions.entrySet()) {
+                var bdd = BinaryDecisionDiagram.create(function.getKey(), function.getValue());
+
+                System.out.printf("%s: %d nodes, tautology: %b\n", function.getKey(), bdd.size(), bdd.isTautology());
 
                 Tests.testBdd(bdd, SINGLE_TEST_OUTPUT);
             }
