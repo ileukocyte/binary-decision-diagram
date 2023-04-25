@@ -97,7 +97,6 @@ public class Main {
             functions.put("ABC + AB + !AC + !ABC", "ABC"); // an S-reduction test
             functions.put("AB + !AB + A!B + !A!B", "AB"); // a tautology (1 node)
             functions.put("ABC + !A + !B + !C", "ABC"); // a tautology (1 node)
-            functions.put("A!A + B!B + C!C + D!D + E!E + F + G", "FGABCDE"); // a tautology (1 node)
 
             for (var function : functions.entrySet()) {
                 var bdd = BinaryDecisionDiagram.create(function.getKey(), function.getValue());

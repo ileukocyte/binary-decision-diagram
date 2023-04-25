@@ -23,7 +23,7 @@ public class BinaryDecisionDiagram {
         falseLeaf = new Node("0");
         trueLeaf = new Node("1");
 
-        this.function = function;
+        this.function = root.getFunctionDnf();
         this.order = order;
         this.map = map;
     }
@@ -303,7 +303,13 @@ public class BinaryDecisionDiagram {
             var pattern = Pattern.compile("!([A-Z])");
             var matcher = pattern.matcher(function);
 
-            return matcher.replaceAll(match -> match.group().toLowerCase().substring(1));
+            var negated = matcher.replaceAll(match -> match.group().toLowerCase().substring(1));
+
+            return Arrays.stream(negated.split("\\+"))
+                    .map(c -> c.chars().mapToObj(i -> (char) i).sorted().map(String::valueOf).collect(Collectors.joining("")))
+                    .distinct()
+                    .sorted()
+                    .collect(Collectors.joining("+"));
         }
 
         public static String parseDigits(String input) {

@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 public class Tests {
     public static final int MIN_CLAUSES = 15;
-    public static final int MAX_CLAUSES = 55;
+    public static final int MAX_CLAUSES = 60;
     public static final String CAPITAL_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
     public static boolean testBdd(BinaryDecisionDiagram bdd, boolean singleTestOutput) {
@@ -77,6 +77,7 @@ public class Tests {
             Collections.shuffle(temp);
 
             // 15% is the probability of whether a variable within a clause will be negated
+            // but only if a clause doesn't already contain a non-inverted variable to prevent a contradiction
             clauses.add(letters.stream()
                     .limit(variablesToTake)
                     .map(v -> (Math.random() <= 0.15 && !clauses.contains(String.valueOf(v)) ? "!" : "") + v)
