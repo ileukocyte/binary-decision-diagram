@@ -64,9 +64,9 @@ public class Main {
                 );
 
                 System.out.printf("Testing (%d variables) has finished, the number of successful tests: %d/%d\n", i, successful, INDIVIDUAL_TESTS);
-                System.out.printf("Average reduction: %f%%\n", testEntry.getReduction());
-                System.out.printf("Average creation time: %d ns\n", testEntry.getCreationTime());
-                System.out.printf("Average memory usage: %d kB\n", testEntry.getMemoryUsage());
+                System.out.printf("Average reduction: %f%%\n", testEntry.reduction());
+                System.out.printf("Average creation time: %d ns\n", testEntry.creationTime());
+                System.out.printf("Average memory usage: %d kB\n", testEntry.memoryUsage());
 
                 avgValues.put(i, testEntry);
 
@@ -79,7 +79,7 @@ public class Main {
             for (var entry : avgValues.entrySet()) {
                 var testEntry = entry.getValue();
 
-                System.out.printf("- %d variables: %f%%, %d ns, %d kB\n", entry.getKey(), testEntry.getReduction(), testEntry.getCreationTime(), testEntry.getMemoryUsage());
+                System.out.printf("- %d variables: %f%%, %d ns, %d kB\n", entry.getKey(), testEntry.reduction(), testEntry.creationTime(), testEntry.memoryUsage());
             }
 
             System.out.println("--------------------------------------------------");
@@ -88,19 +88,20 @@ public class Main {
 
         if (RUN_SPECIAL_TESTS) {
             var functions = new String[][] {
-                    {"!AB!F + !C!D + E!F + AGH + I!JK + L!M!N + XYZ + T", "ABCDEFGHIJKLMNXYZT"}, // should be reduced to 26 nodes
+                    {"!AB!F + !C!D + E!F + AGH + I!JK + L!M!N + XYZ + T", "ABCDEFGHIJKLMNXYZT"}, // an example from the Internet, should be reduced to 26 nodes
                     {"ABCD + AB + BC + CD", "ABCD"}, // a general reduction test (31 nodes -> 8 nodes)
                     {"AB + AC + BC", "ABC"}, // an example from the lecture (reduction combination)
+                    {"ABC + D!D + E!E", "DEABC"}, // an S-reduction test (63 nodes -> 5 nodes)
+                    {"ABC + AB + !AC + !ABC", "ABC"}, // an S-reduction test
                     {"AB + !AB + A!B + !A!B", "AB"}, // a tautology (1 node)
                     {"ABC + !A + !B + !C", "ABC"}, // a tautology (1 node)
-                    {"ABC + D!D + E!E", "DEABC"}, // an S-reduction test (63 nodes -> 5 nodes)
-                    {"ABC + AB + !AC + !ABC", "ABC"} // an S-reduction test
+                    {"A!A + B!B + C!C + D!D + E!E + F + G", "FGABCDE"} // a tautology (1 node)
             };
 
             for (var function : functions) {
                 var bdd = BinaryDecisionDiagram.create(function[0], function[1]);
 
-                System.out.printf("%s: %d nodes\n", function[0], bdd.size());
+                System.out.printf("%s: %d nodes, tautology: %b\n", function[0], bdd.size(), bdd.isTautology());
 
                 Tests.testBdd(bdd, SINGLE_TEST_OUTPUT);
             }

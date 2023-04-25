@@ -52,6 +52,10 @@ public class BinaryDecisionDiagram {
         return computedSize;
     }
 
+    public boolean isTautology() {
+        return root.equals(trueLeaf) && size() == 1;
+    }
+
     public static BinaryDecisionDiagram create(String function, String order) {
         if (function.isEmpty() || order.isEmpty()) {
             throw new IllegalArgumentException("Neither the function nor the order can be empty!");
