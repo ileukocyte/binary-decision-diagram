@@ -145,4 +145,28 @@ public class Tests {
 
         return function.equals("1");
     }
+
+    public static class TestEntry {
+        private final double reduction;
+        private final long creationTime;
+        private final long memoryUsage;
+
+        public TestEntry(double reduction, long creationTime, long memoryUsage) {
+            this.reduction = reduction;
+            this.creationTime = creationTime;
+            this.memoryUsage = memoryUsage;
+        }
+
+        public double getReduction() {
+            return reduction;
+        }
+
+        public long getCreationTime() {
+            return creationTime;
+        }
+
+        public long getMemoryUsage() {
+            return memoryUsage;
+        }
+    }
 }

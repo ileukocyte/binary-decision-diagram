@@ -1,5 +1,7 @@
 package io.ileukocyte.dsa.bdd;
 
+import java.util.TreeMap;
+
 public class Main {
     // Testing flags
     public static final boolean RUN_RANDOM_TESTS = true;
@@ -15,13 +17,16 @@ public class Main {
         if (RUN_RANDOM_TESTS) {
             var successful = INDIVIDUAL_TESTS;
 
-            var testCounter = 0;
+            var totalTestCounter = 0;
             var totalReduction = 0.0;
+
+            var avgValues = new TreeMap<Integer, Tests.TestEntry>();
 
             for (int i = MIN_VARIABLES; i <= MAX_VARIABLES; i++) {
                 var reduction = 0.0;
-                var creationTime = 0;
-                var memoryUsed = 0;
+
+                long creationTime = 0;
+                long memoryUsed = 0;
 
                 for (int j = 0; j < INDIVIDUAL_TESTS; j++) {
                     var dnf = Tests.generateDnfExpression(i);
@@ -47,30 +52,49 @@ public class Main {
                         successful--;
                     }
 
-                    testCounter++;
+                    totalTestCounter++;
                     reduction += 1.0 - (double) bdd.size() / BinaryDecisionDiagram.fullNodeCount(i);
                     totalReduction += 1.0 - (double) bdd.size() / BinaryDecisionDiagram.fullNodeCount(i);
                 }
 
+                var testEntry = new Tests.TestEntry(
+                        (reduction / INDIVIDUAL_TESTS) * 100,
+                        creationTime / INDIVIDUAL_TESTS,
+                        memoryUsed / INDIVIDUAL_TESTS
+                );
+
                 System.out.printf("Testing (%d variables) has finished, the number of successful tests: %d/%d\n", i, successful, INDIVIDUAL_TESTS);
-                System.out.printf("Average reduction: %f%%\n", (reduction / INDIVIDUAL_TESTS) * 100);
-                System.out.printf("Average creation time: %d ns\n", creationTime / INDIVIDUAL_TESTS);
-                System.out.printf("Average memory usage: %d kB\n", memoryUsed / INDIVIDUAL_TESTS);
+                System.out.printf("Average reduction: %f%%\n", testEntry.getReduction());
+                System.out.printf("Average creation time: %d ns\n", testEntry.getCreationTime());
+                System.out.printf("Average memory usage: %d kB\n", testEntry.getMemoryUsage());
+
+                avgValues.put(i, testEntry);
+
                 System.out.println("--------------------------------------------------");
             }
 
-            System.out.printf("[ Total average reduction: %f%% ]\n", (totalReduction / testCounter) * 100);
+            System.out.println("All the tests have finished!");
+            System.out.println("Average values by variable count:");
+
+            for (var entry : avgValues.entrySet()) {
+                var testEntry = entry.getValue();
+
+                System.out.printf("- %d variables: %f%%, %d ns, %d kB\n", entry.getKey(), testEntry.getReduction(), testEntry.getCreationTime(), testEntry.getMemoryUsage());
+            }
+
+            System.out.println("--------------------------------------------------");
+            System.out.printf("[ Total average reduction: %f%% ]\n", (totalReduction / totalTestCounter) * 100);
         }
 
         if (RUN_SPECIAL_TESTS) {
             var functions = new String[][] {
-                    {"!AB!F + !C!D + E!F + AGH + I!JK + L!M!N + XYZ + T", "ABCDEFGHIJKLMNXYZT"},
-                    {"ABCD + AB + BC + CD", "ABCD"},
-                    {"AB + AC + BC", "ABC"},
-                    {"AB + !AB + A!B + !A!B", "AB"},
-                    {"ABC + !A + !B + !C", "ABC"},
-                    {"ABC + D!D + E!E", "DEABC"},
-                    {"ABC + AB + !AC + !ABC", "ABC"}
+                    {"!AB!F + !C!D + E!F + AGH + I!JK + L!M!N + XYZ + T", "ABCDEFGHIJKLMNXYZT"}, // should be reduced to 26 nodes
+                    {"ABCD + AB + BC + CD", "ABCD"}, // a general reduction test (31 nodes -> 8 nodes)
+                    {"AB + AC + BC", "ABC"}, // an example from the lecture (reduction combination)
+                    {"AB + !AB + A!B + !A!B", "AB"}, // a tautology (1 node)
+                    {"ABC + !A + !B + !C", "ABC"}, // a tautology (1 node)
+                    {"ABC + D!D + E!E", "DEABC"}, // an S-reduction test (63 nodes -> 5 nodes)
+                    {"ABC + AB + !AC + !ABC", "ABC"} // an S-reduction test
             };
 
             for (var function : functions) {
